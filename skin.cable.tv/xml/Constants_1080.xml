@@ -18,4 +18,45 @@
 	<constant name="list_bottom_offset">80</constant>
 	<constant name="list_top_offset">100</constant>
 	<constant name="list_item_height">75</constant>
+
+	<!--
+		Cable TV home geometry.
+
+		THE PIN-TO-TOP ARITHMETIC IS LOAD-BEARING. Do not change one of these
+		constants without the others.
+
+		CGUIControlGroupList::OnMessage(GUI_MSG_FOCUSED) has four scroll branches:
+		first child gives ScrollTo(0); last child gives
+		ScrollTo(totalSize - Size()); scrolling back gives ScrollTo(offset);
+		scrolling forward gives ScrollTo(offset + Size(control) - Size()).
+		Layout advances by Size(control) + itemGap, but the forward branch
+		subtracts Size(control) alone.
+
+		So if every row wrapper is exactly as tall as the grouplist itself
+		(lb_rowsviewport) and the gap is (pitch minus viewport), then
+		offset(row i) = i * lb_rowpitch, and all four branches resolve to
+		ScrollTo(i * lb_rowpitch). The focused row lands at the top of the
+		viewport every time, with no per-row animation and no special casing.
+
+		Invisible children are skipped in Process, GetTotalSize and the focus
+		loop, so hiding a row from skin settings keeps the arithmetic exact, and
+		Kodi re-wires navigation across the gap by itself.
+
+		lb_rowgap MUST equal lb_rowpitch minus lb_rowsviewport.
+	-->
+	<constant name="lb_gutter">96</constant>          <!-- left keyline, as Android TV -->
+	<constant name="lb_rowpitch">300</constant>       <!-- vertical distance between rows -->
+	<constant name="lb_rowsviewport">930</constant>   <!-- equals grouplist height (1080 - 150) -->
+	<constant name="lb_rowgap">-630</constant>        <!-- lb_rowpitch minus lb_rowsviewport -->
+	<constant name="lb_rowtop">150</constant>         <!-- where a focused row lands -->
+
+	<!-- Cards are 16:9 throughout, which is both the Leanback idiom and a
+	     requirement: a uniform row pitch means a uniform card height. Album
+	     art uses that same height at 1:1. -->
+	<constant name="lb_cardw">300</constant>
+	<constant name="lb_cardh">169</constant>
+	<constant name="lb_cardpitch">324</constant>      <!-- lb_cardw plus 24px gutter -->
+	<constant name="lb_sqpitch">193</constant>        <!-- lb_cardh plus 24px gutter -->
+	<constant name="lb_rowinner">288</constant>       <!-- fixedlist height inside a row -->
+	<constant name="lb_elev">28</constant>            <!-- shadow bordersize -->
 </includes>

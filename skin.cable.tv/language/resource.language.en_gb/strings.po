@@ -1004,3 +1004,54 @@ msgstr ""
 msgctxt "#31615"
 msgid "Subtitle language"
 msgstr ""
+
+#. Cable TV: home row headings
+msgctxt "#31700"
+msgid "Continue watching"
+msgstr ""
+
+msgctxt "#31701"
+msgid "Recently added movies"
+msgstr ""
+
+msgctxt "#31702"
+msgid "Recently added episodes"
+msgstr ""
+
+msgctxt "#31703"
+msgid "Movies"
+msgstr ""
+
+msgctxt "#31704"
+msgid "Shows to continue"
+msgstr ""
+
+msgctxt "#31705"
+msgid "Recently added albums"
+msgstr ""
+
+msgctxt "#31706"
+msgid "Games"
+msgstr ""
+
+msgctxt "#31707"
+msgid "Apps and add-ons"
+msgstr ""
+
+#. Cable TV: top bar
+msgctxt "#31708"
+msgid "Search"
+msgstr ""
+
+#. Cable TV: skin settings
+msgctxt "#31710"
+msgid "Home rows"
+msgstr ""
+
+msgctxt "#31711"
+msgid "Backdrop"
+msgstr ""
+
+msgctxt "#31712"
+msgid "Show artwork behind the home screen"
+msgstr ""

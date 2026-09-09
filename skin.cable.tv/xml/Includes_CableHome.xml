@@ -1,0 +1,530 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+	Cable TV home screen machinery: the row and the card.
+
+	Everything here is new. Estuary's Includes_Home.xml is left in place
+	untouched, because MyWeather.xml and Includes.xml still reference includes
+	defined there and WeatherWidget takes its content include as a $PARAM, which
+	no static analysis can follow. Home.xml simply stops calling the Widget*
+	includes; unreferenced definitions cost nothing but a little parse time.
+
+	Why an outer grouplist of row wrappers, rather than the obvious designs:
+
+	  * An outer fixedlist whose itemlayout holds a row is impossible. An item
+	    layout accepts image/label/textbox/progress/group only, never a
+	    focusable container.
+	  * A plain <group> per row works but nothing clips, so every row Processes
+	    and renders every frame even when scrolled off, and every onup/ondown
+	    has to be hand-wired, which breaks the moment a skin setting hides a
+	    row.
+	  * A grouplist clips, auto-wires navigation between its children, and
+	    (given the constants in Constants_1080.xml) pins the focused row to the
+	    top of the viewport for free, out of Kodi's own scroll code.
+
+	See the comment block in Constants_1080.xml for the pin-to-top arithmetic.
+-->
+<includes>
+
+	<!--
+		One home row: a heading plus a horizontal fixedlist of cards.
+
+		focusposition=0 with movement=0 collapses CGUIFixedListContainer's cursor
+		range to a single position, so the focused card never moves and the LIST
+		scrolls underneath it. That keeps the focused card on the 96px keyline,
+		which is the Android TV behaviour, and each row independently remembers
+		where it was scrolled to.
+
+		The wrapper's height MUST be lb_rowsviewport for the pin-to-top
+		arithmetic to hold.
+	-->
+	<include name="LeanRow">
+		<param name="visible">true</param>
+		<param name="sortby"></param>
+		<param name="sortorder">descending</param>
+		<param name="limit">14</param>
+		<param name="path2"></param>
+		<param name="target">videos</param>
+		<param name="card">LeanCard16x9</param>
+		<param name="pitch">lb_cardpitch</param>
+		<definition>
+			<control type="group" id="$PARAM[group_id]">
+				<height>lb_rowsviewport</height>
+				<visible>$PARAM[visible]</visible>
+
+				<include content="Anim_RowDim">
+					<param name="list_id" value="$PARAM[list_id]" />
+				</include>
+
+				<control type="label">
+					<left>lb_gutter</left>
+					<top>2</top>
+					<width>1700</width>
+					<height>34</height>
+					<font>lb_rowlabel</font>
+					<textcolor>text_secondary</textcolor>
+					<label>$PARAM[label]</label>
+				</control>
+
+				<control type="fixedlist" id="$PARAM[list_id]">
+					<left>40</left>
+					<top>12</top>
+					<right>0</right>
+					<height>lb_rowinner</height>
+					<orientation>horizontal</orientation>
+					<focusposition>0</focusposition>
+					<movement>0</movement>
+					<scrolltime tween="cubic" easing="out">200</scrolltime>
+					<!-- Clamped to 0..2 by GUIControlFactory; 1 is one card of
+					     read-ahead in the scroll direction, which is enough to
+					     hide pop-in at 200ms without inflating the resident
+					     texture set on a Fire Stick. -->
+					<preloaditems>1</preloaditems>
+					<onup>$PARAM[prev_row]</onup>
+					<ondown>$PARAM[next_row]</ondown>
+					<onleft>$PARAM[list_id]</onleft>
+					<onright>$PARAM[list_id]</onright>
+					<visible>Integer.IsGreater(Container($PARAM[list_id]).NumItems,0) | Container($PARAM[list_id]).IsUpdating</visible>
+
+					<itemlayout width="$PARAM[pitch]" height="lb_rowinner">
+						<include content="$PARAM[card]">
+							<param name="focused" value="false" />
+							<param name="tint" value="card_dim" />
+						</include>
+					</itemlayout>
+					<focusedlayout width="$PARAM[pitch]" height="lb_rowinner">
+						<include content="$PARAM[card]">
+							<param name="focused" value="true" />
+							<param name="tint" value="card_lit" />
+						</include>
+					</focusedlayout>
+
+					<!--
+						DirectoryProvider rather than a helper script: Kodi owns
+						fetching, threading, library-change invalidation, thumb
+						loading, IsUpdating, and click handling that honours the
+						user's own video-select-action. No Python service on the
+						device, and nothing to break if an add-on is removed.
+
+						browse="auto" appends a "More..." item only when the
+						directory holds more rows than limit, so it costs nothing
+						and gives an escape hatch into the full library.
+					-->
+					<content sortby="$PARAM[sortby]" sortorder="$PARAM[sortorder]"
+					         target="$PARAM[target]" limit="$PARAM[limit]" browse="auto">$PARAM[path]</content>
+					<content sortby="$PARAM[sortby]" sortorder="$PARAM[sortorder]"
+					         target="$PARAM[target]" limit="$PARAM[limit]" browse="never"
+					         condition="!String.IsEmpty($PARAM[path2])">$PARAM[path2]</content>
+				</control>
+			</control>
+		</definition>
+	</include>
+
+	<!-- A row of static, hand-authored items (apps and shortcuts). Same
+	     geometry, static <content> instead of a directory. -->
+	<include name="LeanRowStatic">
+		<param name="visible">true</param>
+		<param name="pitch">lb_cardpitch</param>
+		<definition>
+			<control type="group" id="$PARAM[group_id]">
+				<height>lb_rowsviewport</height>
+				<visible>$PARAM[visible]</visible>
+				<include content="Anim_RowDim">
+					<param name="list_id" value="$PARAM[list_id]" />
+				</include>
+				<control type="label">
+					<left>lb_gutter</left>
+					<top>2</top>
+					<width>1700</width>
+					<height>34</height>
+					<font>lb_rowlabel</font>
+					<textcolor>text_secondary</textcolor>
+					<label>$PARAM[label]</label>
+				</control>
+				<control type="fixedlist" id="$PARAM[list_id]">
+					<left>40</left>
+					<top>12</top>
+					<right>0</right>
+					<height>lb_rowinner</height>
+					<orientation>horizontal</orientation>
+					<focusposition>0</focusposition>
+					<movement>0</movement>
+					<scrolltime tween="cubic" easing="out">200</scrolltime>
+					<onup>$PARAM[prev_row]</onup>
+					<ondown>$PARAM[next_row]</ondown>
+					<onleft>$PARAM[list_id]</onleft>
+					<onright>$PARAM[list_id]</onright>
+					<itemlayout width="$PARAM[pitch]" height="lb_rowinner">
+						<include content="LeanCardTile">
+							<param name="focused" value="false" />
+							<param name="surface" value="surface_raised" />
+							<param name="glyph" value="text_secondary" />
+						</include>
+					</itemlayout>
+					<focusedlayout width="$PARAM[pitch]" height="lb_rowinner">
+						<include content="LeanCardTile">
+							<param name="focused" value="true" />
+							<param name="surface" value="accent" />
+							<param name="glyph" value="accent_ink" />
+						</include>
+					</focusedlayout>
+					<include>$PARAM[items]</include>
+				</control>
+			</control>
+		</definition>
+	</include>
+
+	<!--
+		A 16:9 artwork card.
+
+		Three things here are deliberate and easy to get wrong:
+
+		1. The zoom sits on a group containing ONLY the artwork and its shadow,
+		   and center is given explicitly. center="auto" would use the group's
+		   union rect, which includes the 356x225 shadow box, and would drift
+		   the card up-left by about 14px on focus.
+		2. The rect declared on the artwork control is the CARD rect INFLATED by
+		   bordersize on all sides. CGUIBorderedImage's constructor insets by
+		   bordersize, so 28,12,356x225 is what puts the art on 56,40,300x169.
+		3. The shadow and the metadata band exist only in the focused layout.
+		   That saves eight quads and two labels on each of the ~13 unfocused
+		   cards per row, and the container renders the focused item last so the
+		   shadow correctly overlaps its neighbours.
+
+		Rounded corners come from diffuse=, which is a second texture unit in
+		the same draw call, not an extra quad. The mask stretches with the card,
+		so the radius scales with the focus zoom, which is what Material does.
+	-->
+	<include name="LeanCard16x9">
+		<param name="focused">false</param>
+		<param name="tint">card_dim</param>
+		<definition>
+			<control type="group">
+				<include content="Anim_CardFocus">
+					<param name="center" value="206,124" />
+				</include>
+
+				<!-- Placeholder beneath the art, so a card whose thumb has not
+				     loaded is a plate rather than a hole. -->
+				<control type="image">
+					<left>56</left>
+					<top>40</top>
+					<width>lb_cardw</width>
+					<height>lb_cardh</height>
+					<texture diffuse="cable/masks/card16x9.png" colordiffuse="card_placeholder">colors/white.png</texture>
+				</control>
+
+				<control type="image">
+					<left>28</left>
+					<top>12</top>
+					<width>356</width>
+					<height>225</height>
+					<aspectratio>scale</aspectratio>
+					<!-- background="true" makes Kodi decode at the control's
+					     pixel size via the large-texture manager, off the render
+					     thread. Without it a 14-card row can upload ~35MB. -->
+					<texture background="true" diffuse="cable/masks/card16x9.png"
+					         colordiffuse="$PARAM[tint]"
+					         fallback="cable/placeholders/landscape.png">$INFO[ListItem.Art(thumb)]</texture>
+					<bordertexture border="40" infill="false" colordiffuse="shadow_tint">cable/shadows/elev.png</bordertexture>
+					<bordersize>lb_elev</bordersize>
+				</control>
+
+				<control type="image">
+					<left>52</left>
+					<top>36</top>
+					<width>308</width>
+					<height>177</height>
+					<texture border="16" colordiffuse="focus_ring">cable/frames/rounded8-outline.png</texture>
+					<visible>$PARAM[focused]</visible>
+					<include>Animation_FocusTextureFade</include>
+				</control>
+
+				<control type="progress">
+					<left>56</left>
+					<top>203</top>
+					<width>lb_cardw</width>
+					<height>6</height>
+					<info>ListItem.PercentPlayed</info>
+					<visible>ListItem.IsResumable</visible>
+				</control>
+			</control>
+
+			<!-- Sibling of the zooming group, not a child: if the labels were
+			     inside they would scale to 110% and shift down, which looks
+			     broken. Leanback's title sits in fixed reserved space. -->
+			<control type="group">
+				<visible>$PARAM[focused]</visible>
+				<include>Anim_InfoBand</include>
+				<control type="label">
+					<left>56</left>
+					<top>222</top>
+					<width>lb_cardw</width>
+					<height>30</height>
+					<font>lb_cardtitle</font>
+					<textcolor>text_primary</textcolor>
+					<label>$INFO[ListItem.Label]</label>
+				</control>
+				<control type="label">
+					<left>56</left>
+					<top>252</top>
+					<width>lb_cardw</width>
+					<height>26</height>
+					<font>lb_cardsub</font>
+					<textcolor>text_hint</textcolor>
+					<label>$VAR[LeanCardSubVar]</label>
+				</control>
+			</control>
+		</definition>
+	</include>
+
+	<!-- Square card for album art. Same height as the 16:9 card, so the row
+	     pitch stays uniform; only the width and the mask change. -->
+	<include name="LeanCardSquare">
+		<param name="focused">false</param>
+		<param name="tint">card_dim</param>
+		<definition>
+			<control type="group">
+				<include content="Anim_CardFocus">
+					<param name="center" value="140,124" />
+				</include>
+				<control type="image">
+					<left>56</left>
+					<top>40</top>
+					<width>lb_cardh</width>
+					<height>lb_cardh</height>
+					<texture diffuse="cable/masks/card1x1.png" colordiffuse="card_placeholder">colors/white.png</texture>
+				</control>
+				<control type="image">
+					<left>28</left>
+					<top>12</top>
+					<width>225</width>
+					<height>225</height>
+					<aspectratio>scale</aspectratio>
+					<texture background="true" diffuse="cable/masks/card1x1.png"
+					         colordiffuse="$PARAM[tint]"
+					         fallback="cable/placeholders/square.png">$INFO[ListItem.Art(thumb)]</texture>
+					<bordertexture border="40" infill="false" colordiffuse="shadow_tint">cable/shadows/elev.png</bordertexture>
+					<bordersize>lb_elev</bordersize>
+				</control>
+				<control type="image">
+					<left>52</left>
+					<top>36</top>
+					<width>177</width>
+					<height>177</height>
+					<texture border="16" colordiffuse="focus_ring">cable/frames/rounded8-outline.png</texture>
+					<visible>$PARAM[focused]</visible>
+					<include>Animation_FocusTextureFade</include>
+				</control>
+			</control>
+			<control type="group">
+				<visible>$PARAM[focused]</visible>
+				<include>Anim_InfoBand</include>
+				<control type="label">
+					<left>56</left>
+					<top>222</top>
+					<width>240</width>
+					<height>30</height>
+					<font>lb_cardtitle</font>
+					<textcolor>text_primary</textcolor>
+					<label>$INFO[ListItem.Label]</label>
+				</control>
+				<control type="label">
+					<left>56</left>
+					<top>252</top>
+					<width>240</width>
+					<height>26</height>
+					<font>lb_cardsub</font>
+					<textcolor>text_hint</textcolor>
+					<label>$INFO[ListItem.Artist]</label>
+				</control>
+			</control>
+		</definition>
+	</include>
+
+	<!-- Icon tile for the static apps/shortcuts row: a flat surface with a
+	     centred glyph, rather than artwork. -->
+	<include name="LeanCardTile">
+		<param name="focused">false</param>
+		<param name="surface">surface_raised</param>
+		<param name="glyph">text_secondary</param>
+		<definition>
+			<control type="group">
+				<include content="Anim_CardFocus">
+					<param name="center" value="206,124" />
+				</include>
+				<control type="image">
+					<left>28</left>
+					<top>12</top>
+					<width>356</width>
+					<height>225</height>
+					<texture border="16" colordiffuse="$PARAM[surface]">cable/frames/rounded8.png</texture>
+					<bordertexture border="40" infill="false" colordiffuse="shadow_tint">cable/shadows/elev.png</bordertexture>
+					<bordersize>lb_elev</bordersize>
+				</control>
+				<control type="image">
+					<left>170</left>
+					<top>90</top>
+					<width>72</width>
+					<height>72</height>
+					<aspectratio>keep</aspectratio>
+					<texture colordiffuse="$PARAM[glyph]">$INFO[ListItem.Icon]</texture>
+				</control>
+			</control>
+			<control type="group">
+				<visible>$PARAM[focused]</visible>
+				<include>Anim_InfoBand</include>
+				<control type="label">
+					<left>56</left>
+					<top>222</top>
+					<width>lb_cardw</width>
+					<height>30</height>
+					<font>lb_cardtitle</font>
+					<textcolor>text_primary</textcolor>
+					<label>$INFO[ListItem.Label]</label>
+				</control>
+			</control>
+		</definition>
+	</include>
+
+	<!-- Top bar: search on the left, clock and system buttons on the right. -->
+	<include name="LeanTopBar">
+		<definition>
+			<control type="group" id="8000">
+				<top>40</top>
+				<height>72</height>
+
+				<control type="button" id="8010">
+					<left>lb_gutter</left>
+					<top>0</top>
+					<width>230</width>
+					<height>62</height>
+					<label>$LOCALIZE[31708]</label>
+					<font>lb_button</font>
+					<textoffsetx>66</textoffsetx>
+					<texturefocus border="30" colordiffuse="accent">cable/frames/pill.png</texturefocus>
+					<texturenofocus border="30" colordiffuse="surface_raised">cable/frames/pill.png</texturenofocus>
+					<onclick>ActivateWindow(1107)</onclick>
+					<onup>8020</onup>
+					<ondown>9100</ondown>
+					<onleft>8030</onleft>
+					<onright>8020</onright>
+				</control>
+				<control type="image">
+					<description>Search glyph, drawn over the button so it can tint with focus</description>
+					<left>122</left>
+					<top>17</top>
+					<width>28</width>
+					<height>28</height>
+					<texture colordiffuse="$VAR[LeanTopIconVar]">cable/icons/search.png</texture>
+				</control>
+
+				<control type="label">
+					<right>350</right>
+					<top>0</top>
+					<width>420</width>
+					<height>62</height>
+					<align>right</align>
+					<aligny>center</aligny>
+					<font>lb_clock</font>
+					<textcolor>text_secondary</textcolor>
+					<label>$INFO[System.Time]</label>
+				</control>
+
+				<control type="button" id="8020">
+					<right>190</right>
+					<top>0</top>
+					<width>62</width>
+					<height>62</height>
+					<label></label>
+					<texturefocus border="30" colordiffuse="accent">cable/frames/pill.png</texturefocus>
+					<texturenofocus border="30" colordiffuse="surface_raised">cable/frames/pill.png</texturenofocus>
+					<onclick>ActivateWindow(settings)</onclick>
+					<onup>8010</onup>
+					<ondown>9100</ondown>
+					<onleft>8010</onleft>
+					<onright>8030</onright>
+				</control>
+				<control type="image">
+					<right>207</right>
+					<top>17</top>
+					<width>28</width>
+					<height>28</height>
+					<texture colordiffuse="$VAR[LeanSettingsIconVar]">cable/icons/settings.png</texture>
+				</control>
+
+				<control type="button" id="8030">
+					<right>lb_gutter</right>
+					<top>0</top>
+					<width>62</width>
+					<height>62</height>
+					<label></label>
+					<texturefocus border="30" colordiffuse="accent">cable/frames/pill.png</texturefocus>
+					<texturenofocus border="30" colordiffuse="surface_raised">cable/frames/pill.png</texturenofocus>
+					<onclick>ActivateWindow(shutdownmenu)</onclick>
+					<onup>8010</onup>
+					<ondown>9100</ondown>
+					<onleft>8020</onleft>
+					<onright>8010</onright>
+				</control>
+				<control type="image">
+					<right>113</right>
+					<top>17</top>
+					<width>28</width>
+					<height>28</height>
+					<texture colordiffuse="$VAR[LeanPowerIconVar]">cable/icons/power.png</texture>
+				</control>
+			</control>
+		</definition>
+	</include>
+
+	<!--
+		The shortcuts row. Static items, so it works on a completely empty library
+		and is always reachable; it is the escape hatch to the rest of Kodi and is
+		deliberately the one row with no <visible> condition.
+
+		The include supplies the whole <content> block, which is how Kodi's static
+		list providers are declared (the same shape as Estuary's HourlyItems).
+	-->
+	<include name="LeanHomeShortcuts">
+		<content>
+			<item>
+				<label>$LOCALIZE[342]</label>
+				<icon>DefaultMovies.png</icon>
+				<onclick>ActivateWindow(Videos,videodb://movies/titles/,return)</onclick>
+				<visible>Library.HasContent(movies)</visible>
+			</item>
+			<item>
+				<label>$LOCALIZE[20343]</label>
+				<icon>DefaultTVShows.png</icon>
+				<onclick>ActivateWindow(Videos,videodb://tvshows/titles/,return)</onclick>
+				<visible>Library.HasContent(tvshows)</visible>
+			</item>
+			<item>
+				<label>$LOCALIZE[2]</label>
+				<icon>DefaultMusicAlbums.png</icon>
+				<onclick>ActivateWindow(Music,musicdb://,return)</onclick>
+				<visible>Library.HasContent(music)</visible>
+			</item>
+			<item>
+				<label>$LOCALIZE[15016]</label>
+				<icon>DefaultAddonGame.png</icon>
+				<onclick>ActivateWindow(Games,addons://sources/game/,return)</onclick>
+			</item>
+			<item>
+				<label>$LOCALIZE[3]</label>
+				<icon>cable/icons/folder.png</icon>
+				<onclick>ActivateWindow(Videos,sources://video/,return)</onclick>
+			</item>
+			<item>
+				<label>$LOCALIZE[24001]</label>
+				<icon>DefaultAddon.png</icon>
+				<onclick>ActivateWindow(AddonBrowser,addons://,return)</onclick>
+			</item>
+			<item>
+				<label>$LOCALIZE[5]</label>
+				<icon>cable/icons/settings.png</icon>
+				<onclick>ActivateWindow(Settings)</onclick>
+			</item>
+		</content>
+	</include>
+</includes>

@@ -39,6 +39,30 @@ jobs:
             python3 tools/kodilint.py "$skin" --strict
           done
 
+      # Invariants a generic linter cannot express: the pin-to-top arithmetic,
+      # the row navigation chain, and include names passed through a $PARAM.
+      # Each of these fails silently in Kodi if wrong.
+      - name: skin invariants
+        run: |
+          for skin in skin.cable.*; do
+            [ -d "$skin" ] || continue
+            [ -f "$skin/xml/Includes_CableHome.xml" ] || continue
+            python3 tools/check_invariants.py "$skin"
+          done
+
+      # Renders the home screen from the skin's own constants, colours, textures
+      # and fonts, and fails if the focused card overlaps its metadata band.
+      # Not a Kodi emulator; it checks that the arithmetic adds up.
+      - name: home screen geometry preview
+        run: |
+          python3 tools/preview_home.py skin.cable.tv -o preview-home.png
+          python3 tools/preview_home.py skin.cable.tv --focus-row 2 -o preview-home-row3.png
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: preview
+          path: preview-home*.png
+
       - name: assets and fonts are reproducible from a clean checkout
         run: |
           python3 tools/gen_textures.py --skin skin.cable.tv --check

@@ -41,7 +41,7 @@
 	     rect, which includes the shadow box and would drift the card up-left. -->
 	<include name="Anim_CardFocus">
 		<param name="center">auto</param>
-		<param name="zoom">110</param>
+		<param name="zoom">108</param>
 		<definition>
 			<animation type="Focus" reversible="false">
 				<effect type="zoom" start="100" end="$PARAM[zoom]" center="$PARAM[center]"
