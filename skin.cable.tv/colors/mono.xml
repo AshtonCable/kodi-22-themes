@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- mono accent for Cable TV. Overlays colors/defaults.xml; redefines accent names only. -->
+<colors>
+	<color name="accent">FFFFFFFF</color>
+	<color name="accent_dim">66FFFFFF</color>
+	<color name="accent_ink">FF111111</color>
+	<color name="button_focus">FFFFFFFF</color>
+	<color name="button_alt_focus">66FFFFFF</color>
+	<color name="selected">FFFFFFFF</color>
+	<color name="blue">FFFFFFFF</color>
+</colors>

@@ -1,0 +1,8 @@
+{
+  "_comment": "Expected kodilint findings for vendor/skin.estuary (Estuary 4.1.0 @ 4719e45), default severity filter. Every entry is a REAL, verified defect in the shipping skin. This file is a regression test for the LINTER, not for Estuary: if a count changes, the linter changed behaviour, and the burden is on the linter to justify it.",
+  "_E12": "2 genuine silent-transparency bugs. Includes_Games.xml:1040 <textcolor>green</textcolor> and MyPVRGuide.xml:88 <textcolor>lightgrey</textcolor>: neither name exists in colors/defaults.xml, so CGUIColorManager::GetColor sscanf()s them to 0 and the text renders fully transparent with nothing in kodi.log.",
+  "_W02": "1 genuine typo. DialogKeyboard.xml:445 <radioposx>32l</radioposx> parses as 0 (sibling rows use 31/34/38/40/42/45).",
+  "_not_reported": "Duplicate control ids are deliberately NOT errors here. VideoFullScreen id=1 (x5) and GameOSD id=20/2000 are group/image/label controls, which cannot take focus, so a shared id is inert. GameOSD id=1103 and DialogMusicInfo id=130 are focusable but sit under mutually exclusive <visible> conditions, so only one exists at a time; those surface as I02 under --pedantic.",
+  "E12": 2,
+  "W02": 1
+}

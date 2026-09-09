@@ -1,0 +1,18 @@
+Vendored read-only reference copy of Kodi's default skin.
+
+  Source repo : https://github.com/xbmc/xbmc
+  Commit      : 4719e45848e3aeda84f07247fcad03b0744d6833
+  Path        : addons/skin.estuary
+  Skin version: 4.1.0
+  Kodi version: 22.0 BETA2 (ADDON_API 21.90.802)
+  Retrieved   : 2026-09-09
+
+This copy is NEVER shipped and NEVER loaded by Kodi. It exists to:
+  1. document the derivation chain for GPL-2.0 / CC BY-SA 4.0 compliance,
+  2. make "diff our skin against upstream" trivial,
+  3. serve as the calibration fixture for tools/kodilint.py.
+
+Refresh with:
+  git clone --filter=blob:none --sparse --depth 1 --branch master \
+      https://github.com/xbmc/xbmc.git && cd xbmc
+  git sparse-checkout set addons/skin.estuary

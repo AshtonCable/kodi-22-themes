@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+	Cable TV type scale.
+
+	One fontset only. Estuary shipped a second "Arial" set pointing at a system
+	arial.ttf, but Kodi bundles arial.ttf on desktop only - it is absent on
+	Android and on a Raspberry Pi - and a second fontset doubles the glyph atlas
+	when switched. So: one set, shipped fonts, no surprises.
+
+	<style>lighten</style> is deliberately absent everywhere. It is not a weight:
+	GUIFontTTF applies an outline strength of em/-48, thinning the glyph. Estuary
+	used it on nearly every label, and on Roboto at ten feet it reads as anaemic.
+
+	Weights are real baked instances (see FONTS.md), not synthetic emboldening,
+	because <style>bold</style> is FT_Outline_Embolden at em/24 and smears at
+	small sizes on a low-DPI TV panel.
+
+	The lb_* names are ours. Everything below the divider is Estuary's original
+	name set, retargeted: ~60 window files we deliberately do not rewrite still
+	reference those names, and an unresolved <font> renders no text at all.
+-->
+<fonts>
+	<fontset id="Default" idloc="15109">
+
+		<!-- ============ Cable TV scale ============ -->
+
+		<!-- Row headings: caps, tracked. Kodi has no letter-spacing, so the
+		     tracked face is baked with widened advances by tools/gen_fonts. -->
+		<font><name>lb_rowlabel</name><filename>Roboto-Medium-Tracked.ttf</filename><size>22</size><style>uppercase</style></font>
+		<font><name>lb_caption</name><filename>Roboto-Medium-Tracked.ttf</filename><size>17</size><style>uppercase</style></font>
+
+		<!-- Card metadata -->
+		<font><name>lb_cardtitle</name><filename>Roboto-Medium.ttf</filename><size>24</size></font>
+		<font><name>lb_cardsub</name><filename>Roboto-Regular.ttf</filename><size>20</size></font>
+
+		<!-- Body / UI -->
+		<font><name>lb_body</name><filename>Roboto-Regular.ttf</filename><size>24</size></font>
+		<font><name>lb_bodysm</name><filename>Roboto-Regular.ttf</filename><size>20</size></font>
+		<font><name>lb_button</name><filename>Roboto-Medium.ttf</filename><size>22</size></font>
+		<font><name>lb_clock</name><filename>Roboto-Regular.ttf</filename><size>26</size></font>
+
+		<!-- Headings -->
+		<font><name>lb_h1</name><filename>Roboto-Regular.ttf</filename><size>56</size></font>
+		<font><name>lb_h2</name><filename>Roboto-Medium.ttf</filename><size>40</size></font>
+		<font><name>lb_h3</name><filename>Roboto-Medium.ttf</filename><size>30</size></font>
+
+		<!-- ============ Estuary compatibility layer ============
+		     Do not delete any name below. Each is referenced by at least one
+		     window we inherit rather than rewrite; a missing name means that
+		     control renders no text, with nothing in kodi.log to say why. -->
+
+		<font><name>font10</name><filename>Roboto-Regular.ttf</filename><size>20</size></font>
+		<font><name>font12</name><filename>Roboto-Regular.ttf</filename><size>22</size></font>
+		<font><name>font13</name><filename>Roboto-Regular.ttf</filename><size>24</size></font>
+		<font><name>font14</name><filename>Roboto-Regular.ttf</filename><size>26</size></font>
+		<font><name>font23_narrow</name><filename>Roboto-Regular.ttf</filename><size>22</size><linespacing>0.85</linespacing></font>
+		<font><name>font25_narrow</name><filename>Roboto-Regular.ttf</filename><size>24</size><linespacing>0.85</linespacing></font>
+		<font><name>font27</name><filename>Roboto-Regular.ttf</filename><size>26</size></font>
+		<font><name>font27_narrow</name><filename>Roboto-Regular.ttf</filename><size>26</size><linespacing>0.85</linespacing></font>
+		<font><name>font32</name><filename>Roboto-Regular.ttf</filename><size>30</size></font>
+		<font><name>font37</name><filename>Roboto-Regular.ttf</filename><size>34</size></font>
+		<font><name>font45</name><filename>Roboto-Regular.ttf</filename><size>42</size></font>
+		<font><name>font60</name><filename>Roboto-Regular.ttf</filename><size>56</size></font>
+		<font><name>font_clock</name><filename>Roboto-Regular.ttf</filename><size>60</size></font>
+		<font><name>font_flag</name><filename>Roboto-Medium.ttf</filename><size>17</size></font>
+		<font><name>font20_title</name><filename>Roboto-Medium.ttf</filename><size>19</size></font>
+		<font><name>font25_title</name><filename>Roboto-Medium.ttf</filename><size>23</size></font>
+		<font><name>font30_title</name><filename>Roboto-Medium.ttf</filename><size>28</size></font>
+		<font><name>font32_title</name><filename>Roboto-Medium.ttf</filename><size>30</size></font>
+		<font><name>font36_title</name><filename>Roboto-Medium.ttf</filename><size>34</size></font>
+		<font><name>font40_title</name><filename>Roboto-Medium.ttf</filename><size>38</size></font>
+		<font><name>font45_title</name><filename>Roboto-Medium.ttf</filename><size>42</size></font>
+		<font><name>font52_title</name><filename>Roboto-Medium.ttf</filename><size>48</size></font>
+		<font><name>font_MainMenu</name><filename>Roboto-Regular.ttf</filename><size>52</size></font>
+		<font><name>WeatherTemp</name><filename>Roboto-Regular.ttf</filename><size>110</size><aspect>0.9</aspect></font>
+		<font><name>Mono26</name><filename>NotoMono-Regular.ttf</filename><size>24</size></font>
+	</fontset>
+</fonts>

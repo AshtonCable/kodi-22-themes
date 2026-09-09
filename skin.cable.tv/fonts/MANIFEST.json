@@ -1,0 +1,55 @@
+[
+  {
+    "file": "Roboto-Regular.ttf",
+    "family": "roboto",
+    "axes": {
+      "wght": 400,
+      "wdth": 100
+    },
+    "sha256": "966575c62fb61a114f632f0b574644164fe171c28613cf67bd0da786b9d7852c",
+    "bytes": 157584,
+    "licence": "SIL Open Font License 1.1",
+    "credit": "Roboto by Christian Robertson (Google Fonts)",
+    "upstream": "google/fonts:ofl/roboto/Roboto%5Bwdth,wght%5D.ttf"
+  },
+  {
+    "file": "Roboto-Medium.ttf",
+    "family": "roboto",
+    "axes": {
+      "wght": 500,
+      "wdth": 100
+    },
+    "sha256": "f807e9f326c3e1e823208a9d30b70dd4ad00131a54a4a374acbbcb421c5da7cc",
+    "bytes": 157732,
+    "licence": "SIL Open Font License 1.1",
+    "credit": "Roboto by Christian Robertson (Google Fonts)",
+    "upstream": "google/fonts:ofl/roboto/Roboto%5Bwdth,wght%5D.ttf"
+  },
+  {
+    "file": "Roboto-Bold.ttf",
+    "family": "roboto",
+    "axes": {
+      "wght": 700,
+      "wdth": 100
+    },
+    "sha256": "0b2dc1a0f4feaa80df6999e8de578d32da71c3b2af6c8ef5ecdeefa4e3525709",
+    "bytes": 158288,
+    "licence": "SIL Open Font License 1.1",
+    "credit": "Roboto by Christian Robertson (Google Fonts)",
+    "upstream": "google/fonts:ofl/roboto/Roboto%5Bwdth,wght%5D.ttf"
+  },
+  {
+    "file": "Roboto-Medium-Tracked.ttf",
+    "family": "roboto",
+    "axes": {
+      "wght": 500,
+      "wdth": 100,
+      "_track": 0.07
+    },
+    "sha256": "1b8b8fb0a948d9ed2071b1b527f1b5163fe4f13c766c858866c5f4f5f5cf27e9",
+    "bytes": 157732,
+    "licence": "SIL Open Font License 1.1",
+    "credit": "Roboto by Christian Robertson (Google Fonts)",
+    "upstream": "google/fonts:ofl/roboto/Roboto%5Bwdth,wght%5D.ttf"
+  }
+]

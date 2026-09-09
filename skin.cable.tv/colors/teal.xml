@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- teal accent for Cable TV. Overlays colors/defaults.xml; redefines accent names only. -->
+<colors>
+	<color name="accent">FF1DE9B6</color>
+	<color name="accent_dim">661DE9B6</color>
+	<color name="accent_ink">FF00251C</color>
+	<color name="button_focus">FF1DE9B6</color>
+	<color name="button_alt_focus">661DE9B6</color>
+	<color name="selected">FF1DE9B6</color>
+	<color name="blue">FF1DE9B6</color>
+</colors>

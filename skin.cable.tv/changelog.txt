@@ -1,0 +1,7 @@
+[B]0.1.0[/B]
+
+- Initial build, derived from Estuary 4.1.0 for Kodi 22 "Piers".
+- Roboto typography with baked static weights and a tracked face for row headings.
+- Dark Material palette with five selectable accents (Settings > Interface >
+  Skin > Colours).
+- Removed Estuary's per-label drop shadows and glyph-thinning.

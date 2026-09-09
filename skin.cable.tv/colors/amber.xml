@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- amber accent for Cable TV. Overlays colors/defaults.xml; redefines accent names only. -->
+<colors>
+	<color name="accent">FFFFC400</color>
+	<color name="accent_dim">66FFC400</color>
+	<color name="accent_ink">FF2B1D00</color>
+	<color name="button_focus">FFFFC400</color>
+	<color name="button_alt_focus">66FFC400</color>
+	<color name="selected">FFFFC400</color>
+	<color name="blue">FFFFC400</color>
+</colors>

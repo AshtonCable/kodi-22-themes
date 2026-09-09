@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<addon
+	id="skin.cable.tv"
+	version="0.1.0"
+	name="Cable TV"
+	provider-name="Ashton Cable, derived from Estuary by phil65 and Ichabod Fletchman">
+	<requires>
+		<import addon="xbmc.gui" version="5.18.0"/>
+	</requires>
+	<extension point="xbmc.gui.skin" debugging="false">
+		<res width="1920" height="1440" aspect="4:3" default="false" folder="xml" />
+		<res width="1920" height="1280" aspect="3:2" default="false" folder="xml" />
+		<res width="1920" height="1200" aspect="16:10" default="false" folder="xml" />
+		<res width="2040" height="1080" aspect="17:9" default="false" folder="xml" />
+		<res width="1920" height="1080" aspect="16:9" default="true" folder="xml" />
+		<res width="2560" height="1080" aspect="21:9" default="false" folder="xml" />
+		<res width="2338" height="1080" aspect="19.5:9" default="false" folder="xml" />
+		<res width="2160" height="1080" aspect="18:9" default="false" folder="xml" />
+	</extension>
+	<extension point="xbmc.addon.metadata">
+		<platform>all</platform>
+		<license>CC BY-SA 4.0, GNU GENERAL PUBLIC LICENSE Version 2.0</license>
+		<source>https://github.com/AshtonCable/kodi-22-themes</source>
+		<assets>
+			<icon>resources/icon.png</icon>
+			<fanart>resources/fanart.jpg</fanart>
+		</assets>
+		<summary lang="en_GB">A ten-foot launcher skin for Kodi</summary>
+		<description lang="en_GB">Cable TV reshapes Kodi's home screen into rows of artwork cards that scale as you move across them, with the focused row held at the top of the screen. Designed for a remote control at ten feet, and tuned to stay smooth on low-power boxes like a Fire TV Stick or a Raspberry Pi.[CR][CR]Derived from Estuary by phil65 and Ichabod Fletchman.</description>
+	</extension>
+</addon>

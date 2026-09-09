@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- blue accent for Cable TV. Overlays colors/defaults.xml; redefines accent names only. -->
+<colors>
+	<color name="accent">FF00B0FF</color>
+	<color name="accent_dim">6600B0FF</color>
+	<color name="accent_ink">FF00202E</color>
+	<color name="button_focus">FF00B0FF</color>
+	<color name="button_alt_focus">6600B0FF</color>
+	<color name="selected">FF00B0FF</color>
+	<color name="blue">FF00B0FF</color>
+</colors>

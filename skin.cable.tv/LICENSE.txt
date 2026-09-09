@@ -1,0 +1,31 @@
+Cable TV (skin.cable.tv) by Ashton Cable.
+
+Derived from Estuary by phil65 and Ichabod Fletchman (Team Kodi), taken from
+https://github.com/xbmc/xbmc at commit
+4719e45848e3aeda84f07247fcad03b0744d6833 (Estuary 4.1.0).
+
+Code and XML are licensed under the GNU General Public License (GPL),
+Version 2.0. Full text: ../LICENSE
+  <https://www.gnu.org/licenses/gpl-2.0>
+
+Artwork is licensed under a Creative Commons Attribution-ShareAlike 4.0
+International License. Full text: ../LICENSE.CC-BY-SA-4.0.txt
+  <http://creativecommons.org/licenses/by-sa/4.0/>
+
+Source is available at <https://github.com/AshtonCable/kodi-22-themes>.
+
+Bundled fonts are licensed separately; see FONTS.md and the licence files in
+fonts/.
+
+----------------------------------------------------------------------
+Upstream notice, retained from Estuary:
+
+Estuary by phil65 (Team Kodi)
+
+Estuary Artwork is licensed under a
+Creative Commons Attribution-ShareAlike 4.0 Unported License.
+You can find the license details here: <http://creativecommons.org/licenses/by-sa/4.0/>.
+
+Estuary code work is licensed under
+GNU General Public License (GPL), Version 2.0
+You can find the license details here: <https://www.gnu.org/licenses/gpl-2.0>.

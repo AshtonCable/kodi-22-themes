@@ -1,0 +1,13 @@
+{
+  "generated_from": "https://github.com/xbmc/xbmc",
+  "commit": "4719e45848e3aeda84f07247fcad03b0744d6833",
+  "kodi_version": "22.0 BETA2",
+  "xbmc_gui_version": "5.18.0",
+  "xbmc_gui_backwards_abi": "5.17.0",
+  "skin_string_range": [
+    31000,
+    31999
+  ],
+  "required_file_count": 76,
+  "core_string_count": 4560
+}

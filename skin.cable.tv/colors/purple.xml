@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- purple accent for Cable TV. Overlays colors/defaults.xml; redefines accent names only. -->
+<colors>
+	<color name="accent">FFB388FF</color>
+	<color name="accent_dim">66B388FF</color>
+	<color name="accent_ink">FF1B0F33</color>
+	<color name="button_focus">FFB388FF</color>
+	<color name="button_alt_focus">66B388FF</color>
+	<color name="selected">FFB388FF</color>
+	<color name="blue">FFB388FF</color>
+</colors>

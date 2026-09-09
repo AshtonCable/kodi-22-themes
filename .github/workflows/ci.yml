@@ -1,0 +1,72 @@
+name: ci
+
+on:
+  push:
+  pull_request:
+  schedule:
+    # Weekly: catch Kodi 22 adding or removing a required window as it moves
+    # from beta to final, rather than discovering it from a user's black screen.
+    - cron: '17 5 * * 1'
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install --quiet pillow fonttools brotli
+      - run: sudo apt-get update -qq && sudo apt-get install -y -qq libxml2-utils
+
+      # An independent second opinion on well-formedness: if xmllint and
+      # ElementTree ever disagree, the linter is the thing that is wrong.
+      - name: xmllint every XML file
+        run: |
+          find skin.* vendor -name '*.xml' -print0 \
+            | xargs -0 -r -n 50 xmllint --noout
+
+      # The linter's own regression test. Estuary is a real, shipping, known-good
+      # skin; if the expected findings change, the linter changed behaviour.
+      - name: linter calibration against vendored Estuary
+        run: python3 tools/kodilint.py vendor/skin.estuary --summary-only
+                     --expect tools/calibration.json
+
+      - name: lint skins
+        run: |
+          for skin in skin.cable.*; do
+            [ -d "$skin" ] || continue
+            python3 tools/kodilint.py "$skin" --strict
+          done
+
+      - name: assets and fonts are reproducible from a clean checkout
+        run: |
+          python3 tools/gen_textures.py --skin skin.cable.tv --check
+          python3 tools/fetch_fonts.py --skin skin.cable.tv --verify
+
+      - name: package
+        run: |
+          bash tools/package.sh
+          ls -la dist/
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: skins
+          path: dist/*.zip
+
+  reference-data:
+    # Separate job: needs the network and the Kodi source, and a failure here
+    # means "Kodi moved", not "this change is broken".
+    runs-on: ubuntu-latest
+    if: github.event_name == 'schedule'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: check reference data against current Kodi master
+        run: |
+          git clone --filter=blob:none --sparse --depth 1 --branch master \
+            https://github.com/xbmc/xbmc.git /tmp/xbmc
+          git -C /tmp/xbmc sparse-checkout set addons xbmc media system version.txt
+          python3 tools/gen_reference_data.py --xbmc-src /tmp/xbmc --check

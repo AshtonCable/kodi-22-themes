@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+	Cable TV palette.
+
+	READ THIS BEFORE REMOVING A NAME.
+
+	CGUIColorManager::GetColor falls through an unknown colour name to
+	sscanf(name, "%x"), which yields 0 - fully transparent - and logs nothing at
+	all. So a typo'd or deleted colour name does not produce an error; it makes
+	UI silently vanish. Estuary 4.1.0 ships two live instances of exactly this
+	bug (<textcolor>green</textcolor> and <textcolor>lightgrey</textcolor>).
+
+	Consequently this file is a RETARGET of Estuary's palette, not a replacement:
+	the second block preserves every name Estuary's XML references, so the ~60
+	window files we inherit rather than rewrite keep working. tools/kodilint.py
+	enforces this - it resolves every colour reference in the skin against this
+	file and errors on any that is missing.
+
+	Two aliases in that block do most of the heavy lifting:
+	  button_focus -> accent   is referenced by 59 files, so this one line
+	                           accents every window we never touch.
+	  text_shadow  -> 00000000 is referenced by 25 files; zeroing it removes
+	                           Estuary's drop shadow from every label without
+	                           editing a single inherited file. Material has no
+	                           text shadow.
+
+	Colours are AARRGGBB. Text alphas follow the Material dark-theme emphasis
+	levels (100/70/54/38%) rather than being eyeballed.
+-->
+<colors>
+
+	<!-- ================= Surfaces ================= -->
+	<color name="background">FF0E0E10</color>        <!-- near-black, faint blue cast -->
+	<color name="surface">FF1A1B1E</color>           <!-- dialogs, sheets -->
+	<color name="surface_raised">FF25272B</color>    <!-- headers, raised rows -->
+	<color name="card_placeholder">FF2A2C30</color>  <!-- card before art loads -->
+	<color name="divider">1FFFFFFF</color>           <!-- Material 12% -->
+
+	<!-- ================= Scrims ================= -->
+	<color name="scrim_strong">CC000000</color>
+	<color name="scrim_soft">66000000</color>
+	<color name="shadow_tint">CC000000</color>
+
+	<!-- ================= Accent ================= -->
+	<!-- Overridden per theme by colors/<accent>.xml; see those files. -->
+	<color name="accent">FF00B0FF</color>            <!-- Light Blue A400 -->
+	<color name="accent_dim">6600B0FF</color>
+	<color name="accent_ink">FF00202E</color>        <!-- text drawn on accent -->
+
+	<!-- ================= Text ================= -->
+	<color name="text_primary">FFFFFFFF</color>
+	<color name="text_secondary">B3FFFFFF</color>    <!-- 70% -->
+	<color name="text_hint">8AFFFFFF</color>         <!-- 54% -->
+	<color name="text_disabled">61FFFFFF</color>     <!-- 38% -->
+
+	<!-- ================= Focus / cards ================= -->
+	<color name="focus_ring">FFFFFFFF</color>
+	<color name="card_lit">FFFFFFFF</color>          <!-- colordiffuse, focused art -->
+	<color name="card_dim">B3FFFFFF</color>          <!-- colordiffuse, unfocused art -->
+
+	<!-- ================= Status ================= -->
+	<color name="ok">FF00E676</color>
+	<color name="warn">FFFFAB00</color>
+	<color name="error">FFFF5252</color>
+
+	<!-- ============================================================
+	     Estuary compatibility layer.
+	     Every name below is referenced by inherited window XML. Do not
+	     delete any of them: a missing name renders transparent, silently.
+	     ============================================================ -->
+	<color name="primary_background">FF0E0E10</color>
+	<color name="secondary_background">00000000</color>  <!-- kills Estuary's pattern overlay -->
+	<color name="dialog_tint">FF1A1B1E</color>
+	<color name="dialog_header_tint">FF25272B</color>
+	<color name="bg_image">FF808080</color>
+	<color name="bg_overlay">33FFFFFF</color>            <!-- backdrop dim; no blur exists in Kodi -->
+	<color name="black">FF000000</color>
+	<color name="white">FFFFFFFF</color>
+	<color name="grey">B3FFFFFF</color>
+	<color name="blue">FF00B0FF</color>
+	<color name="red">FFFF5252</color>
+	<color name="button_focus">FF00B0FF</color>          <!-- == accent; 59 files -->
+	<color name="button_alt_focus">6600B0FF</color>
+	<color name="text_shadow">00000000</color>           <!-- 25 files; Material has no text shadow -->
+	<color name="border_alpha">1FFFFFFF</color>
+	<color name="disabled">61FFFFFF</color>
+	<color name="selected">FF00B0FF</color>
+	<color name="invalid">FFFF5252</color>
+</colors>
