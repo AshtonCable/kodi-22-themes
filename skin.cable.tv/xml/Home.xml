@@ -24,7 +24,14 @@
 	on. onup/ondown reference WRAPPERS, never lists.
 -->
 <window>
-	<defaultcontrol always="true">9111</defaultcontrol>
+	<!--
+		Points at the grouplist, not at a row's list. On a library with no movies
+		and no TV shows the first row is invisible, and a defaultcontrol naming
+		an unfocusable control can leave the window with nothing focused at all.
+		Focusing a container delegates to its first focusable child, so this
+		degrades correctly however many rows are hidden.
+	-->
+	<defaultcontrol>9100</defaultcontrol>
 	<backgroundcolor>background</backgroundcolor>
 	<controls>
 

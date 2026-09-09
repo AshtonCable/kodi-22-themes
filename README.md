@@ -6,9 +6,38 @@ desktop.
 
 | Skin | Add-on id | Status |
 |---|---|---|
-| **Cable TV** — ten-foot launcher: rows of artwork cards, focused row pinned to the top | `skin.cable.tv` | in progress |
-| **Cable Retro** — retro console dashboard, switchable between two console styles | `skin.cable.retro` | planned |
-| **Cable Stream** — hero billboard and poster carousels | `skin.cable.stream` | planned |
+| **Cable TV** — ten-foot launcher: rows of artwork cards, focused row pinned to the top | `skin.cable.tv` | installable, home screen built |
+| **Cable Retro** — retro console dashboard, switchable between two console styles | `skin.cable.retro` | not started |
+| **Cable Stream** — hero billboard and poster carousels | `skin.cable.stream` | not started |
+
+![Cable TV home screen](docs/preview-home.png)
+
+*Rendered by `tools/preview_home.py` from the skin's own constants, colours,
+textures and fonts. It is not a Kodi screenshot — see [Why there is a
+linter](#why-there-is-a-linter).*
+
+## Cable TV: what is done
+
+- **Home screen** — top bar (search, clock, settings, power) and rows of 16:9
+  cards. The focused row pins to the top of the screen and the focused card
+  holds the left keyline while the row scrolls beneath it. Rows: Continue
+  watching, Recently added movies, Recently added episodes, Shows to continue,
+  Movies, Recently added albums, Games, and a static shortcuts row that works on
+  an empty library.
+- **Global restyle** — every other window, including ones neither of us will
+  open, is dark, flat, Roboto and accent-focused, via `colors/defaults.xml`,
+  `Defaults.xml`, and in-place regeneration of the Estuary textures that ~170
+  inherited call sites point at.
+- **Five accent colours** — Settings → Interface → Skin → Colours.
+- **Typography** — Roboto, with real baked weights and a tracked face for row
+  headings.
+
+Still to do: the library view layouts, the info dialogs and OSDs, the Games
+screens, and a skin-settings page for the row toggles (the toggles themselves
+work, they just have no UI yet — `no_row_continue`, `no_row_recentmovies`,
+`no_row_recentepisodes`, `no_row_inprogresstv`, `no_row_randommovies`,
+`no_row_music`, `no_row_games`, and `backdrop_mode` set to `art`, `thumb` or
+`off`, all settable with `Skin.SetBool` / `Skin.SetString`).
 
 All three are derivative works of **Estuary**, Kodi's default skin. See
 [`NOTICE.md`](NOTICE.md) for the licence and attribution chain.
@@ -75,6 +104,8 @@ readout, which is the performance meter that matters on a Stick.
 | `python3 tools/gen_textures.py --skin skin.cable.tv` | Regenerate every texture and the add-on artwork |
 | `python3 tools/fetch_fonts.py --skin skin.cable.tv` | Fetch fonts and bake static instances |
 | `python3 tools/gen_reference_data.py --xbmc-src <path>` | Refresh Kodi-version reference data |
+| `python3 tools/check_invariants.py skin.cable.tv` | Assert the load-bearing home-screen invariants |
+| `python3 tools/preview_home.py skin.cable.tv -o out.png` | Render the home screen from the skin's own assets |
 | `bash tools/package.sh` | Build installable zips into `dist/` |
 
 Every binary asset in a skin is generated, not hand-drawn: the two commands above
@@ -101,6 +132,16 @@ calibrated against the vendored copy of Estuary at
 `tools/calibration.json`: linting a real, shipping, known-good skin must report
 exactly the known-real defects and nothing else. That runs in CI, and it is what
 stops the linter decaying into noise.
+
+Two further checks cover what the linter cannot express.
+`tools/check_invariants.py` asserts the home screen's load-bearing arithmetic:
+the row pitch relation that makes the focused row pin to the top, that every
+row wrapper declares the required height, that the row navigation chain is
+complete and references real wrappers, and that include names passed through a
+`$PARAM` resolve. `tools/preview_home.py` renders the home screen from the
+skin's own constants, colours, textures and fonts and fails the build if the
+focused card overlaps its metadata band — which is exactly the bug it caught on
+its first run, a 0.55px clearance at 110% zoom that reads as touching on a TV.
 
 Real visual sign-off still happens on hardware — Kodi 22 cannot be installed in
 CI (distro repos carry Kodi 20, and the Kodi PPA is unreachable from the build
