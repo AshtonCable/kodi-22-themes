@@ -1,32 +1,24 @@
 #!/usr/bin/env bash
-# Package each skin into an installable zip.
+# Build every installable artefact.
 #
-# Kodi's "Install from zip file" requires the add-on-id directory at the ZIP
-# ROOT, so we zip from the repository root with the directory name included --
-# not from inside the skin directory.
+# Thin wrapper over tools/build_repo.py so there is exactly one implementation of
+# "how an add-on becomes a zip". It produces:
+#
+#   dist/<id>-<version>.zip   flat, for the README's direct-download links
+#   repo/                     the Kodi repository tree (addons.xml + per-add-on zips)
+#
+# Then verifies the result, because both the index digest and the zip root layout
+# fail silently in Kodi when wrong.
 set -euo pipefail
 
 cd "$(dirname "$0")/.."
-mkdir -p dist
 
-version_of() {
-	python3 - "$1" <<'PY'
-import sys, xml.etree.ElementTree as ET
-print(ET.parse(f"{sys.argv[1]}/addon.xml").getroot().get("version"))
-PY
-}
-
-shopt -s nullglob
-for skin in skin.cable.* repository.cable.*; do
-	[ -d "$skin" ] || continue
-	[ -f "$skin/addon.xml" ] || continue
-	version="$(version_of "$skin")"
-	out="dist/${skin}-${version}.zip"
-	rm -f "$out"
-	zip -qr "$out" "$skin" \
-		-x '*.git*' -x '*/.DS_Store' -x '*/__pycache__/*' -x '*.pyc'
-	printf '%-42s %8s bytes\n' "$out" "$(stat -c%s "$out")"
-done
-
+python3 tools/build_repo.py
+echo
+python3 tools/build_repo.py --verify
+echo
+echo "dist/:"
+ls -1sh dist/*.zip 2>/dev/null | sed 's/^/  /'
 echo
 echo "Install on a device with: Settings > Add-ons > Install from zip file"
+echo "See the Install section of README.md for the full walkthrough."

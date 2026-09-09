@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+	Cable Skins repository.
+
+	Install this once and the skins show up in Kodi's own add-on browser and
+	update in place, instead of being re-side-loaded on every device.
+
+	The <dir> block below only uses attributes Kodi 22 actually reads. Checked
+	against xbmc/addons/Repository.cpp at the pinned commit:
+
+	  * <checksum verify="sha256"> IS read, and the index digest IS verified
+	    against it. FetchChecksum truncates the response at the first space or
+	    newline, so a file containing just the hex digest is correct.
+	  * <hashes> is parsed into RepositoryDirInfo::hashType, but nothing in
+	    Kodi 22 consumes that field, so it is omitted rather than cargo-culted.
+	  * ParseDirConfiguration reads no "zip" attribute, so the widely-copied
+	    <datadir zip="true"> does nothing. Omitted.
+	  * Gzip is detected from a .gz extension or the response MIME type, so
+	    <info> can point at a plain .xml and needs no compressed="false".
+
+	IF YOU CHANGE ANY URL BELOW, BUMP THIS ADD-ON'S VERSION. Kodi caches the
+	index per repository version and will otherwise keep serving the old one.
+
+	Note also that CRepository::FetchIfChanged defaults recheckAfter to 24 hours,
+	so a newly pushed skin version will not appear immediately. Forcing a check
+	is described in the README.
+-->
+<addon
+	id="repository.cable.skins"
+	name="Cable Skins"
+	version="1.0.0"
+	provider-name="Ashton Cable">
+	<requires>
+		<import addon="xbmc.addon" version="12.0.0"/>
+	</requires>
+	<extension point="xbmc.addon.repository" name="Cable Skins">
+		<dir>
+			<info>https://raw.githubusercontent.com/AshtonCable/kodi-22-themes/main/repo/addons.xml</info>
+			<checksum verify="sha256">https://raw.githubusercontent.com/AshtonCable/kodi-22-themes/main/repo/addons.xml.sha256</checksum>
+			<datadir>https://raw.githubusercontent.com/AshtonCable/kodi-22-themes/main/repo</datadir>
+		</dir>
+	</extension>
+	<extension point="xbmc.addon.metadata">
+		<platform>all</platform>
+		<license>GNU GENERAL PUBLIC LICENSE Version 2.0</license>
+		<source>https://github.com/AshtonCable/kodi-22-themes</source>
+		<assets>
+			<icon>icon.png</icon>
+		</assets>
+		<summary lang="en_GB">Cable skins for Kodi</summary>
+		<description lang="en_GB">Installs and updates the Cable family of skins for Kodi 22.</description>
+	</extension>
+</addon>

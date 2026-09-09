@@ -68,15 +68,27 @@ jobs:
           python3 tools/gen_textures.py --skin skin.cable.tv --check
           python3 tools/fetch_fonts.py --skin skin.cable.tv --verify
 
+      # repo/ is committed build output, so CI must prove it is current: a stale
+      # addons.xml or a missing zip breaks the repository add-on for everyone.
+      - name: repository tree is current and structurally valid
+        run: |
+          python3 tools/build_repo.py --check
+          python3 tools/build_repo.py --verify
+
       - name: package
         run: |
           bash tools/package.sh
-          ls -la dist/
 
       - uses: actions/upload-artifact@v4
         with:
           name: skins
           path: dist/*.zip
+
+      # The README links directly at raw.githubusercontent URLs and the
+      # repository add-on resolves its index from them. A typo there is invisible
+      # until someone tries to install, so check every URL we publish resolves.
+      - name: published URLs resolve
+        run: python3 tools/check_urls.py
 
   reference-data:
     # Separate job: needs the network and the Kodi source, and a failure here
