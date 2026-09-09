@@ -1224,18 +1224,24 @@
 		<width>auto</width>
 	</include>
 	<include name="ColoredBackgroundImages">
+		<!--
+			The base surface behind almost every window.
+
+			Estuary layered a tinted teal photograph (extras/backgrounds/primary.jpg)
+			plus an optional repeating pattern on top. Cable TV is flat, so this is
+			one 4x4 white pixel stretched and tinted - which also means the base
+			background costs a single quad and no image decode at all, which matters
+			on a Fire Stick at startup.
+
+			secondary_background is deliberately 00000000 in colors/defaults.xml, so
+			any inherited reference to the old pattern layer resolves to nothing
+			rather than needing every call site edited.
+		-->
 		<control type="image">
 			<depth>DepthBackground</depth>
 			<include>FullScreenDimensions</include>
-			<aspectratio>scale</aspectratio>
-			<texture colordiffuse="primary_background">special://skin/extras/backgrounds/primary.jpg</texture>
-		</control>
-		<control type="image">
-			<depth>DepthBackground</depth>
-			<include>FullScreenDimensions</include>
-			<aspectratio>scale</aspectratio>
-			<texture colordiffuse="secondary_background" fallback="special://skin/extras/backgrounds/pattern1.png">$INFO[Skin.String(background_overlay),special://skin/extras/backgrounds/pattern,.png]</texture>
-			<visible>!String.IsEqual(Skin.String(background_overlay),0)</visible>
+			<aspectratio>stretch</aspectratio>
+			<texture colordiffuse="background">colors/white.png</texture>
 		</control>
 	</include>
 	<include name="DefaultBackground">

@@ -389,12 +389,22 @@ def collect_definitions(skin: Skin, findings: list[Finding]) -> None:
 # ---------------------------------------------------------------------------
 
 def _skippable_value(value: str) -> bool:
-    """Values the linter cannot statically resolve, and must not flag."""
+    """Values the linter cannot statically resolve, and must not flag.
+
+    Note that special://skin/ and special://xbmc/media/ ARE resolvable and must
+    NOT be skipped here -- resolve() handles them. Skipping every "://" value
+    was hiding real broken references to skin-relative paths.
+    """
     if not value or value in {"-", "0"}:
         return True
     if "$" in value:            # $INFO / $VAR / $PARAM / $LOCALIZE / $EXP
         return True
-    if "://" in value:          # full VFS path or URL
+    if "://" in value and not value.startswith("special://"):
+        return True             # http(s), smb, plugin, image, ... runtime only
+    if value.endswith("/"):
+        # A directory, not a file: <imagepath> on multiimage takes a folder and
+        # Kodi enumerates it at runtime. Estuary points one at
+        # special://xbmc/media/qr/kodilove/, which is populated per-build.
         return True
     return False
 

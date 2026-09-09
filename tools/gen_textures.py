@@ -273,6 +273,28 @@ def icon_folder(px, out: Path) -> None:
     _save(im.resize((px, px), Image.LANCZOS), out)
 
 
+def switch(size, out: Path, on: bool) -> None:
+    """Material-style toggle, drawn as ONE image because Kodi's radiobutton takes
+    a single texture per state rather than composing track and knob itself.
+
+    Track and knob are both white but at different alphas, so a single
+    colordiffuse at the use site tints the whole control coherently: accent when
+    on, muted when off.
+    """
+    w, h = size
+    im = Image.new("RGBA", (w * SS, h * SS), (0, 0, 0, 0))
+    d = ImageDraw.Draw(im)
+    trh = int(h * 0.52) * SS                     # track height
+    trt = (h * SS - trh) // 2
+    d.rounded_rectangle([0, trt, w * SS - 1, trt + trh], radius=trh // 2,
+                        fill=(255, 255, 255, 90))
+    kr = int(h * 0.44) * SS                      # knob radius
+    kx = (w * SS - kr) if on else kr
+    d.ellipse([kx - kr, h * SS // 2 - kr, kx + kr, h * SS // 2 + kr],
+              fill=(255, 255, 255, 255))
+    _save(im.resize(size, Image.LANCZOS), out)
+
+
 def placeholder(size, radius, out: Path) -> None:
     """Fallback art: a flat rounded plate on the card surface colour.
 
@@ -321,6 +343,10 @@ def build(media: Path) -> None:
           c / "scrims" / "vgrad.png")
     vignette((320, 180), c / "scrims" / "vignette.png")
     radial((512, 512), c / "scrims" / "glow.png", gamma=2.2, peak=230)
+
+    # --- controls
+    switch((92, 48), c / "controls" / "switch-on.png", on=True)
+    switch((92, 48), c / "controls" / "switch-off.png", on=False)
 
     # --- busy spinner
     arc_spinner((96, 96), c / "spinner.png")
@@ -413,11 +439,85 @@ def brand_assets(skin_dir: Path) -> None:
                             progressive=True)
 
 
+# Estuary textures we regenerate IN PLACE, at byte-identical dimensions and with
+# the same 9-slice semantics, so that ~170 inherited call sites pick up Cable TV's
+# corner radius and palette without editing a single one of them. This is the
+# texture-side equivalent of the colour retarget in colors/defaults.xml.
+#
+# Semantics matter here and are not guessable, so they were read off Estuary's
+# actual pixels: the dark surfaces bake their own colour because many call sites
+# use them bare with no colordiffuse, while the focus fill is near-white
+# precisely so call sites CAN tint it. Keep Estuary's alpha values - inherited
+# XML composites these against each other and expects them.
+ESTUARY_OVERRIDES = [
+    # (path,                          size,     radius, rgb,          alpha)
+    ("buttons/button-fo.png",         (80, 80), 12, (255, 255, 255), 255),
+    ("buttons/button-nofo.png",       (80, 80), 12, (26, 27, 30),    204),
+    ("buttons/dialogbutton-fo.png",   (80, 80), 12, (255, 255, 255), 255),
+    ("buttons/dialogbutton-nofo.png", (80, 80), 12, (37, 39, 43),    128),
+    ("dialogs/dialog-bg.png",         (80, 80), 12, (26, 27, 30),    204),
+]
+# 1x1 flat fills: stretched by Kodi and tinted at most call sites. Retargeted to
+# the Cable TV palette; dimensions must stay 1x1 or the stretch changes.
+ESTUARY_FLAT_OVERRIDES = [
+    ("dialogs/dialog-bg-nobo.png", (26, 27, 30), 204),
+    ("lists/panel.png",            (26, 27, 30), 230),
+    ("lists/focus.png",            (255, 255, 255), 255),
+]
+
+
+def estuary_overrides(media: Path) -> None:
+    for rel, size, radius, rgb, alpha in ESTUARY_OVERRIDES:
+        w, h = size
+        im = Image.new("RGBA", (w * SS, h * SS), (0, 0, 0, 0))
+        ImageDraw.Draw(im).rounded_rectangle(
+            [0, 0, w * SS - 1, h * SS - 1], radius=radius * SS, fill=rgb + (alpha,))
+        _save(im.resize(size, Image.LANCZOS), media / rel)
+
+    for rel, rgb, alpha in ESTUARY_FLAT_OVERRIDES:
+        _save(Image.new("RGBA", (1, 1), rgb + (alpha,)), media / rel)
+
+    # overlays/shadow.png is used 53 times as
+    #   <bordertexture border="21" infill="false">overlays/shadow.png
+    # so the gradient must live INSIDE the outer 21px band and be uniform along
+    # each edge, because Kodi stretches the edge strips. A blurred rounded rect
+    # whose edge sits ~18px in satisfies both.
+    w = h = 80
+    im = Image.new("RGBA", (w, h), (0, 0, 0, 0))
+    ImageDraw.Draw(im).rounded_rectangle([18, 18, w - 19, h - 19], radius=12,
+                                         fill=(0, 0, 0, 195))
+    _save(im.filter(ImageFilter.GaussianBlur(7)), media / "overlays" / "shadow.png")
+
+    # frame/InfoBar.png (16x512) is the top/bottom bar gradient in TopBar and
+    # BottomBar. Estuary's is a teal-tinted bar; ours is a neutral scrim so the
+    # bars read as darkening over content rather than as a coloured chrome strip.
+    bar = Image.new("RGBA", (16, 512), (0, 0, 0, 0))
+    px = bar.load()
+    for y in range(512):
+        t = y / 511
+        a = int(round(214 * ((1 - t) ** 1.35)))
+        for x in range(16):
+            px[x, y] = (10, 10, 12, a)
+    _save(bar, media / "frame" / "InfoBar.png")
+
+
+OVERRIDE_PATHS = ([rel for rel, *_ in ESTUARY_OVERRIDES]
+                  + [rel for rel, *_ in ESTUARY_FLAT_OVERRIDES]
+                  + ["overlays/shadow.png", "frame/InfoBar.png"])
+
+
 def digest_tree(root: Path) -> dict[str, str]:
-    return {
-        str(p.relative_to(root)): hashlib.sha256(p.read_bytes()).hexdigest()
-        for p in sorted(root.rglob("*.png"))
-    }
+    """Digest of everything gen_textures owns: media/cable plus the in-place
+    Estuary overrides."""
+    out = {
+        "cable/" + str(p.relative_to(root / "cable")): hashlib.sha256(p.read_bytes()).hexdigest()
+        for p in sorted((root / "cable").rglob("*.png"))
+    } if (root / "cable").is_dir() else {}
+    for rel in OVERRIDE_PATHS:
+        f = root / rel
+        if f.is_file():
+            out[rel] = hashlib.sha256(f.read_bytes()).hexdigest()
+    return out
 
 
 def main() -> int:
@@ -433,10 +533,11 @@ def main() -> int:
         raise SystemExit(f"error: {skin_dir} does not exist")
 
     if args.check:
-        existing = digest_tree(skin_dir / "media" / "cable")
+        existing = digest_tree(skin_dir / "media")
         with tempfile.TemporaryDirectory() as tmp:
             build(Path(tmp))
-            fresh = digest_tree(Path(tmp) / "cable")
+            estuary_overrides(Path(tmp))
+            fresh = digest_tree(Path(tmp))
         if existing != fresh:
             only_committed = sorted(set(existing) - set(fresh))
             only_fresh = sorted(set(fresh) - set(existing))
@@ -451,19 +552,19 @@ def main() -> int:
             for k in changed:
                 print(f"  content differs: {k}", file=sys.stderr)
             return 1
-        total = sum((skin_dir / "media" / "cable" / k).stat().st_size for k in existing)
+        total = sum((skin_dir / "media" / k).stat().st_size for k in existing)
         print(f"reproducible: {len(existing)} textures, {total} bytes total")
         return 0
 
     build(skin_dir / "media")
+    estuary_overrides(skin_dir / "media")
     brand_assets(skin_dir)
-    tree = digest_tree(skin_dir / "media" / "cable")
-    total = sum((skin_dir / "media" / "cable" / k).stat().st_size for k in tree)
+    tree = digest_tree(skin_dir / "media")
+    total = sum((skin_dir / "media" / k).stat().st_size for k in tree)
     for name in sorted(tree):
-        p = skin_dir / "media" / "cable" / name
-        from PIL import Image as _I
-        with _I.open(p) as im:
-            print(f"  {name:38} {im.size[0]:>4}x{im.size[1]:<4} {p.stat().st_size:>6} B")
+        f = skin_dir / "media" / name
+        with Image.open(f) as im:
+            print(f"  {name:44} {im.size[0]:>4}x{im.size[1]:<4} {f.stat().st_size:>6} B")
     print(f"{len(tree)} textures, {total} bytes ({total/1024:.1f} KiB) total")
     return 0
 

@@ -1,138 +1,231 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!--
+	Cable TV motion.
+
+	Every include name from Estuary is preserved: around forty window files we do
+	not rewrite reference these by name, and an unresolved <include> is a hard
+	error. What changes is the timing and the curve.
+
+	Three rules, applied throughout:
+
+	  1. cubic easing="out", never sine. Kodi has no cubic-bezier tweener
+	     (VisibleEffect.cpp offers linear/quadratic/cubic/sine/back/circle/
+	     bounce/elastic only), and cubic/out is the closest available to
+	     Material's fast-out-slow-in. Estuary's sine reads as laggy at ten feet
+	     because it leaves too slowly.
+	  2. No tween="back". Its overshoot is an iOS idiom; Material decelerates
+	     into place without bouncing past it.
+	  3. 150-200ms, and exits shorter than entrances. Estuary used 300-400ms with
+	     a 160ms delay before dialogs even began, which is most of why the stock
+	     skin feels heavy on a remote.
+
+	Slide travel is also reduced from 320px to 220px: shorter distance at a
+	shorter duration keeps the apparent velocity sane rather than frantic.
+
+	Skin.HasSetting(no_slide_animations) is Estuary's name and is deliberately
+	kept - inherited windows branch on it, and it is the skin's one-switch
+	low-power mode.
+-->
 <includes>
+
+	<!-- ============ Focus ============ -->
+
 	<include name="Animation_FocusTextureFade">
-		<animation effect="fade" start="0" end="100" time="200" tween="sine">Focus</animation>
+		<animation effect="fade" start="0" end="100" time="150" tween="cubic" easing="out">Focus</animation>
 		<animation effect="fade" start="100" end="0" time="0">UnFocus</animation>
 	</include>
+
+	<!-- Card focus. The zoom lives on a group whose ONLY child set is the
+	     artwork and its shadow, so the card's labels do not scale with it.
+	     center is passed in because center="auto" would use the group's union
+	     rect, which includes the shadow box and would drift the card up-left. -->
+	<include name="Anim_CardFocus">
+		<param name="center">auto</param>
+		<param name="zoom">110</param>
+		<definition>
+			<animation type="Focus" reversible="false">
+				<effect type="zoom" start="100" end="$PARAM[zoom]" center="$PARAM[center]"
+				        time="180" tween="cubic" easing="out" />
+			</animation>
+			<animation type="UnFocus" reversible="false">
+				<effect type="zoom" start="$PARAM[zoom]" end="100" center="$PARAM[center]"
+				        time="140" tween="cubic" easing="out" />
+			</animation>
+		</definition>
+	</include>
+
+	<!-- The metadata band under a focused card: delayed in so it trails the
+	     zoom, fast out so it never lingers behind the moving focus. -->
+	<include name="Anim_InfoBand">
+		<animation effect="fade" start="0" end="100" time="150" delay="60" tween="cubic" easing="out">Focus</animation>
+		<animation effect="fade" start="100" end="0" time="90">UnFocus</animation>
+	</include>
+
+	<!-- Rows that do not hold focus recede. One Control.HasFocus() per row,
+	     which is an id comparison against the window's focused control. -->
+	<include name="Anim_RowDim">
+		<param name="list_id">0</param>
+		<param name="dim">55</param>
+		<definition>
+			<animation type="Conditional" condition="!Control.HasFocus($PARAM[list_id])" reversible="true">
+				<effect type="fade" end="$PARAM[dim]" time="180" tween="cubic" easing="out" />
+			</animation>
+		</definition>
+	</include>
+
+	<!-- ============ Dialogs ============ -->
+
 	<include name="Animation_DialogPopupOpenClose">
 		<animation type="WindowOpen" reversible="false">
-			<effect type="zoom" start="80" end="100" center="50%,50%" delay="160" tween="back" time="240" />
-			<effect type="fade" delay="160" end="100" time="240" />
+			<effect type="zoom" start="92" end="100" center="50%,50%" tween="cubic" easing="out" time="180" />
+			<effect type="fade" end="100" time="180" />
 		</animation>
 		<animation type="WindowClose" reversible="false">
-			<effect type="zoom" start="100" end="80" center="50%,50%" easing="in" tween="back" time="240" />
-			<effect type="fade" start="100" end="0" time="240" />
+			<effect type="zoom" start="100" end="94" center="50%,50%" tween="cubic" easing="out" time="130" />
+			<effect type="fade" start="100" end="0" time="130" />
 		</animation>
 		<depth>DepthDialog</depth>
 	</include>
+
 	<include name="Animation_DialogPopupVisible">
 		<animation type="Visible" reversible="false">
-			<effect type="zoom" start="80" end="100" center="50%,50%" delay="160" tween="back" time="240" />
-			<effect type="fade" delay="160" end="100" time="240" />
+			<effect type="zoom" start="92" end="100" center="50%,50%" tween="cubic" easing="out" time="180" />
+			<effect type="fade" end="100" time="180" />
 		</animation>
 		<animation type="Hidden" reversible="false">
-			<effect type="zoom" start="100" end="80" center="50%,50%" easing="in" tween="back" time="240" />
-			<effect type="fade" start="100" end="0" time="240" />
+			<effect type="zoom" start="100" end="94" center="50%,50%" tween="cubic" easing="out" time="130" />
+			<effect type="fade" start="100" end="0" time="130" />
 		</animation>
 	</include>
+
+	<!-- ============ Plain fades ============ -->
+
 	<include name="Visible_Fade">
-		<animation effect="fade" end="100" time="200">Visible</animation>
-		<animation effect="fade" start="100" end="0" time="200">Hidden</animation>
+		<animation effect="fade" end="100" time="160" tween="cubic" easing="out">Visible</animation>
+		<animation effect="fade" start="100" end="0" time="120">Hidden</animation>
 	</include>
+
 	<include name="OpenClose_Fade">
-		<animation effect="fade" end="100" time="200">WindowOpen</animation>
-		<animation effect="fade" start="100" end="0" time="200">WindowClose</animation>
+		<animation effect="fade" end="100" time="160" tween="cubic" easing="out">WindowOpen</animation>
+		<animation effect="fade" start="100" end="0" time="120">WindowClose</animation>
 	</include>
+
+	<!-- ============ Directional slides ============ -->
+
 	<include name="Visible_Right_Delayed">
 		<include condition="Skin.HasSetting(no_slide_animations)">Visible_Fade</include>
 		<include content="Vis_FadeSlide_Right_Delayed" condition="!Skin.HasSetting(no_slide_animations)">
 			<param name="id" value="$PARAM[id]" />
 		</include>
 	</include>
+
 	<include name="Vis_FadeSlide_Right_Delayed">
 		<animation type="Conditional" condition="String.IsEqual(Container(9000).ListItem.Property(id),$PARAM[id])">
-			<effect type="fade" start="0" end="100" time="300" tween="sine" delay="300" easing="out" />
-			<effect type="slide" start="320" end="0" time="400" delay="300" tween="cubic" easing="out" />
+			<effect type="fade" start="0" end="100" time="160" delay="120" tween="cubic" easing="out" />
+			<effect type="slide" start="220" end="0" time="220" delay="120" tween="cubic" easing="out" />
 		</animation>
 		<animation type="Hidden">
-			<effect type="fade" start="100" end="0" time="300" tween="sine" easing="out" />
-			<effect type="slide" start="0" end="320" time="300" tween="cubic" easing="out" />
+			<effect type="fade" start="100" end="0" time="120" tween="cubic" easing="out" />
+			<effect type="slide" start="0" end="220" time="160" tween="cubic" easing="out" />
 		</animation>
 	</include>
+
 	<include name="Visible_Right">
 		<include condition="Skin.HasSetting(no_slide_animations)">Visible_Fade</include>
 		<include condition="!Skin.HasSetting(no_slide_animations)">Vis_FadeSlide_Right</include>
 	</include>
-	<include name="Animation_TopSlide">
-		<animation type="WindowOpen" reversible="false">
-			<effect type="fade" start="0" end="100" time="300"/>
-			<effect type="slide" start="0,-200" end="0,0" time="300" tween="cubic" easing="out" />
-		</animation>
-		<animation type="WindowClose" reversible="false">
-			<effect type="fade" start="100" end="0" time="300"/>
-			<effect type="slide" start="0,0" end="0,-200" time="300" tween="cubic" easing="out" />
-		</animation>
-	</include>
-	<include name="Animation_BottomSlide">
-		<animation type="WindowOpen" reversible="false">
-			<effect type="fade" start="0" end="100" time="300"/>
-			<effect type="slide" start="0,200" end="0,0" time="300" tween="cubic" easing="out" />
-		</animation>
-		<animation type="WindowClose" reversible="false">
-			<effect type="fade" start="100" end="0" time="300"/>
-			<effect type="slide" start="0,0" end="0,200" time="300" tween="cubic" easing="out" />
-		</animation>
-	</include>
+
 	<include name="Vis_FadeSlide_Right">
 		<animation type="Visible" reversible="false">
-			<effect type="fade" start="0" end="100" time="300" tween="sine" easing="out"/>
-			<effect type="slide" start="320" end="0" time="400" tween="cubic" easing="out" />
+			<effect type="fade" start="0" end="100" time="160" tween="cubic" easing="out"/>
+			<effect type="slide" start="220" end="0" time="220" tween="cubic" easing="out" />
 		</animation>
 		<animation type="Hidden" reversible="false">
-			<effect type="fade" start="100" end="0" time="300" tween="sine" easing="out" />
-			<effect type="slide" start="0" end="320" time="300" tween="cubic" easing="out" />
+			<effect type="fade" start="100" end="0" time="120" tween="cubic" easing="out" />
+			<effect type="slide" start="0" end="220" time="160" tween="cubic" easing="out" />
 		</animation>
 	</include>
+
 	<include name="Visible_Left">
 		<include condition="Skin.HasSetting(no_slide_animations)">Visible_Fade</include>
 		<include condition="!Skin.HasSetting(no_slide_animations)">Vis_FadeSlide_Left</include>
 	</include>
+
 	<include name="Vis_FadeSlide_Left">
 		<animation type="Visible" reversible="false">
-			<effect type="fade" start="0" end="100" time="300" tween="sine" easing="out" />
-			<effect type="slide" start="-320" end="0" time="400" tween="cubic" easing="out" />
+			<effect type="fade" start="0" end="100" time="160" tween="cubic" easing="out" />
+			<effect type="slide" start="-220" end="0" time="220" tween="cubic" easing="out" />
 		</animation>
 		<animation type="Hidden" reversible="false">
-			<effect type="fade" start="100" end="0" time="300" tween="sine" easing="out" />
-			<effect type="slide" start="0" end="-320" time="300" tween="cubic" easing="out" />
+			<effect type="fade" start="100" end="0" time="120" tween="cubic" easing="out" />
+			<effect type="slide" start="0" end="-220" time="160" tween="cubic" easing="out" />
 		</animation>
 	</include>
+
 	<include name="OpenClose_Left">
 		<include condition="Skin.HasSetting(no_slide_animations)">OpenClose_Fade</include>
 		<include condition="!Skin.HasSetting(no_slide_animations)">OpenClose_FadeSlide_Left</include>
 	</include>
+
 	<include name="OpenClose_FadeSlide_Left">
 		<animation type="WindowOpen">
-			<effect type="fade" start="0" end="100" time="300" tween="sine" easing="out" />
-			<effect type="slide" start="-320" end="0" time="400" tween="cubic" easing="out" />
+			<effect type="fade" start="0" end="100" time="160" tween="cubic" easing="out" />
+			<effect type="slide" start="-220" end="0" time="220" tween="cubic" easing="out" />
 		</animation>
 		<animation type="WindowClose">
-			<effect type="fade" start="100" end="0" time="300" tween="sine" easing="out" />
-			<effect type="slide" start="0" end="-320" time="300" tween="cubic" easing="out" />
+			<effect type="fade" start="100" end="0" time="120" tween="cubic" easing="out" />
+			<effect type="slide" start="0" end="-220" time="160" tween="cubic" easing="out" />
 		</animation>
 	</include>
+
 	<include name="OpenClose_Right">
 		<include condition="Skin.HasSetting(no_slide_animations)">OpenClose_Fade</include>
 		<include condition="!Skin.HasSetting(no_slide_animations)">OpenClose_FadeSlide_Right</include>
 	</include>
+
 	<include name="OpenClose_FadeSlide_Right">
 		<animation type="WindowOpen">
-			<effect type="fade" start="0" end="100" time="300" tween="sine" easing="out" />
-			<effect type="slide" start="320" end="0" time="400" tween="cubic" easing="out" />
+			<effect type="fade" start="0" end="100" time="160" tween="cubic" easing="out" />
+			<effect type="slide" start="220" end="0" time="220" tween="cubic" easing="out" />
 		</animation>
 		<animation type="WindowClose">
-			<effect type="fade" start="100" end="0" time="300" tween="sine" easing="out" />
-			<effect type="slide" start="0" end="320" time="300" tween="cubic" easing="out" />
+			<effect type="fade" start="100" end="0" time="120" tween="cubic" easing="out" />
+			<effect type="slide" start="0" end="220" time="160" tween="cubic" easing="out" />
 		</animation>
 	</include>
+
+	<!-- ============ Window transitions ============ -->
+
+	<include name="Animation_TopSlide">
+		<animation type="WindowOpen" reversible="false">
+			<effect type="fade" start="0" end="100" time="180"/>
+			<effect type="slide" start="0,-140" end="0,0" time="200" tween="cubic" easing="out" />
+		</animation>
+		<animation type="WindowClose" reversible="false">
+			<effect type="fade" start="100" end="0" time="130"/>
+			<effect type="slide" start="0,0" end="0,-140" time="150" tween="cubic" easing="out" />
+		</animation>
+	</include>
+
+	<include name="Animation_BottomSlide">
+		<animation type="WindowOpen" reversible="false">
+			<effect type="fade" start="0" end="100" time="180"/>
+			<effect type="slide" start="0,140" end="0,0" time="200" tween="cubic" easing="out" />
+		</animation>
+		<animation type="WindowClose" reversible="false">
+			<effect type="fade" start="100" end="0" time="130"/>
+			<effect type="slide" start="0,0" end="0,140" time="150" tween="cubic" easing="out" />
+		</animation>
+	</include>
+
 	<include name="Keyboard_Slide_Up">
 		<animation type="WindowOpen">
-			<effect type="fade" start="0" end="100" time="300" tween="sine" easing="out" />
-			<effect type="slide" start="0,1080" end="0,0" time="400" tween="cubic" easing="out" />
+			<effect type="fade" start="0" end="100" time="180" tween="cubic" easing="out" />
+			<effect type="slide" start="0,1080" end="0,0" time="260" tween="cubic" easing="out" />
 		</animation>
 		<animation type="WindowClose">
-			<effect type="fade" start="100" end="0" time="300" tween="sine" easing="out" />
-			<effect type="slide" start="0,0" end="0,1080" time="400" tween="cubic" easing="out" />
+			<effect type="fade" start="100" end="0" time="140" tween="cubic" easing="out" />
+			<effect type="slide" start="0,0" end="0,1080" time="220" tween="cubic" easing="out" />
 		</animation>
 	</include>
 </includes>

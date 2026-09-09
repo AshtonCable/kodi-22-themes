@@ -56,7 +56,7 @@
 						<width>660</width>
 						<height>370</height>
 						<aspectratio aligny="top">scale</aspectratio>
-						<texture fallback="special://skin/extras/home-images/music.jpg">$INFO[ListItem.Art(fanart)]</texture>
+						<texture fallback="cable/placeholders/square.png">$INFO[ListItem.Art(fanart)]</texture>
 						<visible>String.IsEmpty(Control.GetLabel(400))</visible>
 					</control>
 					<control type="group">
@@ -107,7 +107,7 @@
 							<width>660</width>
 							<height>370</height>
 							<aspectratio aligny="top">scale</aspectratio>
-							<texture fallback="special://skin/extras/home-images/music.jpg">$INFO[ListItem.Art(fanart)]</texture>
+							<texture fallback="cable/placeholders/square.png">$INFO[ListItem.Art(fanart)]</texture>
 						</control>
 						<control type="group">
 							<visible>String.IsEmpty(ListItem.Art(fanart))</visible>
@@ -140,7 +140,7 @@
 							<width>1154</width>
 							<height>277</height>
 							<aspectratio aligny="top">scale</aspectratio>
-							<texture fallback="special://skin/extras/home-images/music.jpg">$INFO[ListItem.Art(fanart)]</texture>
+							<texture fallback="cable/placeholders/square.png">$INFO[ListItem.Art(fanart)]</texture>
 						</control>
 						<control type="group">
 							<visible>String.IsEmpty(ListItem.Art(fanart))</visible>
